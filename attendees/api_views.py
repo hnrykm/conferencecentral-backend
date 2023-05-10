@@ -3,6 +3,7 @@ from common.json import ModelEncoder
 from .models import Attendee
 from events.models import Conference
 from django.views.decorators.http import require_http_methods
+from events.api_views import ConferenceListEncoder
 import json
 
 
@@ -20,7 +21,7 @@ class AttendeeDetailEncoder(ModelEncoder):
         "created",
         "conference",
     ]
-    encoders = {"conference": AttendeesListEncoder()}
+    encoders = {"conference": ConferenceListEncoder()}
 
 
 @require_http_methods(["GET", "POST"])
@@ -62,8 +63,10 @@ def api_list_attendees(request, conference_id):
                 status=400,
             )
 
-    attendee = Attendee.objects.create(**content)
-    return JsonResponse(attendee, encoder=AttendeeDetailEncoder, safe=False)
+        attendee = Attendee.objects.create(**content)
+        return JsonResponse(
+            attendee, encoder=AttendeeDetailEncoder, safe=False
+        )
 
 
 def api_show_attendee(request, id):
