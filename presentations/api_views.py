@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from common.json import ModelEncoder
 from .models import Presentation, Status
+from events.api_views import ConferenceListEncoder
 
 
 class PresentationListEncoder(ModelEncoder):
@@ -20,7 +21,14 @@ class PresentationDetailEncoder(ModelEncoder):
         "title",
         "synopsis",
         "created",
+        "conference",
     ]
+    encoders = {
+        "conference": ConferenceListEncoder(),
+    }
+
+    def get_extra_data(self, o):
+        return {"status": o.status.name}
 
 
 def api_list_presentations(request, conference_id):

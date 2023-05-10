@@ -1,11 +1,16 @@
 from django.http import JsonResponse
 from common.json import ModelEncoder
-from .models import Conference, Location
+from .models import Conference, Location, State
 
 
 class LocationListEncoder(ModelEncoder):
     model = Location
     properties = ["name"]
+
+
+class StateEncoder(ModelEncoder):
+    model = State
+    properties = ["abbreviation"]
 
 
 class ConferenceDetailEncoder(ModelEncoder):
@@ -41,8 +46,9 @@ class LocationDetailEncoder(ModelEncoder):
         "updated",
     ]
 
-    def get_extra_data(self, o):
-        return {"state": o.state.abbreviation}
+    encoders = {"state": StateEncoder()}
+    # def get_extra_data(self, o):
+    #     return {"state": o.state.abbreviation}
 
 
 def api_list_conferences(request):
