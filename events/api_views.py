@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from common.json import ModelEncoder
+import json
 from .models import Conference, Location, State
+from django.views.decorators.http import require_http_methods
 
 
 class LocationListEncoder(ModelEncoder):
@@ -109,6 +111,7 @@ def api_show_conference(request, id):
     )
 
 
+@require_http_methods(["GET", "POST"])
 def api_list_locations(request):
     """
     Lists the location names and the link to the location.
@@ -128,14 +131,31 @@ def api_list_locations(request):
         ]
     }
     """
-    locations_list = Location.objects.all()
-    return JsonResponse(
-        {"locations_list": locations_list},
-        encoder=LocationListEncoder,
-        safe=False,
-    )
+    if request.method == "GET":
+        locations = Location.objects.all()
+        return JsonResponse(
+            {"locations": locations},
+            encoder=LocationListEncoder,
+            safe=False,
+        )
+    else:
+        content = json.loads(request.body)
+
+        try:
+            # Get the State object and put it in the content dict
+            state = State.objects.get(abbreviation=content["state"])
+            content["state"] = state
+        except State.DoesNotExist:
+            return JsonResponse(
+                {"message": "Invalid state abbreviation"}, status=400
+            )
+        location = Location.objects.create(**content)
+        return JsonResponse(
+            location, encoder=LocationDetailEncoder, safe=False
+        )
 
 
+@require_http_methods(["DELETE", "GET", "PUT"])
 def api_show_location(request, id):
     """
     Returns the details for the Location model specified
@@ -153,5 +173,33 @@ def api_show_location(request, id):
         "state": the two-letter abbreviation for the state,
     }
     """
-    location = Location.objects.get(id=id)
-    return JsonResponse(location, encoder=LocationDetailEncoder, safe=False)
+    if request.method == "GET":
+        location = Location.objects.get(id=id)
+        return JsonResponse(
+            location, encoder=LocationDetailEncoder, safe=False
+        )
+    elif request.method == "DELETE":
+        count, _ = Location.objects.filter(id=id).delete()
+        return JsonResponse({"deleted": count > 0})
+    else:
+        # copied from create
+        content = json.loads(request.body)
+        try:
+            # new code
+            if "state" in content:
+                state = State.objects.get(abbreviation=content["state"])
+                content["state"] = state
+        except State.DoesNotExist:
+            return JsonResponse(
+                {"message": "Invalid state abbreviation"},
+                status=400,
+            )
+
+        # new code
+        Location.objects.filter(id=id).update(**content)
+
+        # copied from get detail
+        location = Location.objects.get(id=id)
+        return JsonResponse(
+            location, encoder=LocationDetailEncoder, safe=False
+        )

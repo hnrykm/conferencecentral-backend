@@ -47,7 +47,7 @@ class ModelEncoder(DateEncoder, QuerySetEncoder, JSONEncoder):
                 if property in self.encoders:
                     # assign value of encoders (linked to Location) property (name) to encoder variable
                     encoder = self.encoders[property]
-                    # new value is the json.dumps JSON of encodr (or name)
+                    # new value is the json.dumps JSON of encoder (or name)
                     value = encoder.default(value)
                 # create property key with value
                 d.update(self.get_extra_data(o))
