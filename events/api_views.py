@@ -122,14 +122,12 @@ def api_list_locations(request):
         ]
     }
     """
-    locations_list = [
-        {
-            "name": location.name,
-            "href": location.get_api_url(),
-        }
-        for location in Location.objects.all()
-    ]
-    return JsonResponse({"locations_list": locations_list})
+    locations_list = Location.objects.all()
+    return JsonResponse(
+        {"locations_list": locations_list},
+        encoder=LocationListEncoder,
+        safe=False,
+    )
 
 
 def api_show_location(request, id):
