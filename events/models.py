@@ -32,7 +32,7 @@ class Location(models.Model):
     room_count = models.PositiveSmallIntegerField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    photo_url = models.URLField(null=True)
+    photo_url = models.URLField(null=True, default=None)
     state = models.ForeignKey(
         State,
         related_name="+",  # do not create a related name on State
