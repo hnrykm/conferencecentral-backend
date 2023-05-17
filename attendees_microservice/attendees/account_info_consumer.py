@@ -6,7 +6,6 @@ import django
 import os
 import sys
 import time
-from .models import ConferenceVO
 
 
 sys.path.append("")
@@ -33,7 +32,7 @@ def update_accountvo(ch, method, properties, body):
             updated=updated,
         )
     else:
-        AccountVO.objects.filter(id=email).delete()
+        AccountVO.objects.filter(email=email).delete()
 
 
 # Declare a function to update the AccountVO object (ch, method, properties, body)
@@ -65,7 +64,7 @@ while True:
 
         channel.queue_bind(exchange="account_info", queue=queue_name)
         channel.basic_consume(
-            queue="",
+            queue=queue_name,
             on_message_callback=update_accountvo,
             auto_ack=True,
         )
