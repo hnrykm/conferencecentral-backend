@@ -45,3 +45,10 @@ services:
       - MH_SMTP_BIND_ADDR=0.0.0.0:25
     ports:
       - "3000:8025"
+
+  attendees_account_info:
+    build:
+      context: ./attendees_microservice
+      dockerfile: ./Dockerfile.account_info.dev
+    volumes:
+      - "./attendees_microservice:/app"
